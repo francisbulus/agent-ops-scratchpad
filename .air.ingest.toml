@@ -1,0 +1,18 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "cd services/ingest && GOCACHE=/tmp/go-build go build -o ./tmp/ingest ./cmd/ingest"
+bin = "services/ingest/tmp/ingest"
+include_dir = ["services/ingest", "packages/schemas"]
+include_ext = ["go", "mod", "sum", "json"]
+exclude_dir = ["services/ingest/tmp", "tmp", ".git", "notes"]
+delay = 200
+stop_on_error = true
+kill_delay = "500ms"
+
+[log]
+time = true
+
+[screen]
+clear_on_rebuild = true

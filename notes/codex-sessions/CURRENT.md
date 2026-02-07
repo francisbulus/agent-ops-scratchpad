@@ -1,14 +1,14 @@
 # Codex Session Handoff - Current
 
-- Active session file: `notes/codex-sessions/007-2026-02-07-2103.md`
+- Active session file: `notes/codex-sessions/009-2026-02-07-2129.md`
 - State: `closed`
-- Last updated (UTC): `2026-02-07 21:09:18Z`
-- Session title: `Implement TKT-002 schema validation on ingest endpoint`
-- Summary for next session: `Implemented TKT-002 with POST /v1/events schema validation, structured 400 errors, tests, and docs updates.`
+- Last updated (UTC): `2026-02-07 21:31:00Z`
+- Session title: `Replace custom autoreload with air`
+- Summary for next session: `Replaced custom autoreload script with air config and docs.`
 
 ## Immediate Next Steps
 
-- Commit/push TKT-002 changes and begin TKT-003 Postgres persistence.
+- Commit/push the air migration changes, then continue with TKT-003.
 
 ## Start Checklist
 

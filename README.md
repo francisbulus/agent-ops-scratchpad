@@ -207,6 +207,7 @@ Working ideas for an agent observability + governance dashboard to track cost, u
 
 - Git
 - Go `1.25+` (for `services/ingest`)
+- `air` for autoreload dev server (`go install github.com/air-verse/air@latest`)
 - `curl` (for health checks)
 
 ## Local Startup (Current MVP Scaffold)
@@ -214,6 +215,12 @@ Working ideas for an agent observability + governance dashboard to track cost, u
 ```bash
 cd services/ingest
 go run ./cmd/ingest
+```
+
+Autoreload (recommended for local development):
+
+```bash
+air -c .air.ingest.toml
 ```
 
 Health checks:

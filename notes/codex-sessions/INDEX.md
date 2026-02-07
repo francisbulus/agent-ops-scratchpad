@@ -9,3 +9,5 @@
 | `005` | `2026-02-07 20:37:40Z` | `francis` | Break MVP into trackable testable tickets | `notes/codex-sessions/005-2026-02-07-2037.md` |
 | `006` | `2026-02-07 20:51:33Z` | `francis` | Implement TKT-001 ingest scaffold with structured logging | `notes/codex-sessions/006-2026-02-07-2051.md` |
 | `007` | `2026-02-07 21:03:05Z` | `francis` | Implement TKT-002 schema validation on ingest endpoint | `notes/codex-sessions/007-2026-02-07-2103.md` |
+| `008` | `2026-02-07 21:26:14Z` | `francis` | Add autoreload dev server for ingest | `notes/codex-sessions/008-2026-02-07-2126.md` |
+| `009` | `2026-02-07 21:29:51Z` | `francis` | Replace custom autoreload with air | `notes/codex-sessions/009-2026-02-07-2129.md` |

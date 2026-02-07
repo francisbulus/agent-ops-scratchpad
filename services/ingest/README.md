@@ -9,6 +9,21 @@ cd services/ingest
 go run ./cmd/ingest
 ```
 
+## Run with Autoreload
+
+```bash
+cd ../..
+air -c .air.ingest.toml
+```
+
+This watches `services/ingest` Go files and `packages/schemas/*.json`, then restarts the service on changes.
+
+Install `air` (once):
+
+```bash
+go install github.com/air-verse/air@latest
+```
+
 Environment variables:
 
 - `PORT` (default: `8080`)
