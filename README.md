@@ -202,3 +202,37 @@ Working ideas for an agent observability + governance dashboard to track cost, u
 - Start a new handoff: `scripts/codex-session start --title "..."`
 - Close with explicit next-step context: `scripts/codex-session close --summary "..." --next "..."`
 - New Codex sessions should read `notes/codex-sessions/CURRENT.md` first.
+
+## Startup Requirements
+
+- Git
+- Go `1.25+` (for `services/ingest`)
+- `curl` (for health checks)
+
+## Local Startup (Current MVP Scaffold)
+
+```bash
+cd services/ingest
+go run ./cmd/ingest
+```
+
+Health checks:
+
+```bash
+curl -sS http://localhost:8080/healthz
+curl -sS http://localhost:8080/readyz
+```
+
+Config vars:
+
+- `PORT` (default `8080`)
+- `APP_ENV` (default `dev`)
+- `LOG_LEVEL` (default `info`, one of `debug|info|warn|error`)
+- `SHUTDOWN_TIMEOUT` (default `10s`)
+
+Run tests:
+
+```bash
+cd services/ingest
+go test ./...
+```
