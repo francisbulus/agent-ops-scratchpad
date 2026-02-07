@@ -12,6 +12,7 @@ const (
 	defaultEnv             = "dev"
 	defaultLogLevel        = "info"
 	defaultShutdownTimeout = 10 * time.Second
+	defaultSchemaPath      = "packages/schemas/agent-event-v0.schema.json"
 )
 
 // Config holds runtime settings for the ingest service.
@@ -20,6 +21,7 @@ type Config struct {
 	Env             string
 	LogLevel        string
 	ShutdownTimeout time.Duration
+	SchemaPath      string
 }
 
 // Load reads config from environment with sensible defaults.
@@ -29,6 +31,7 @@ func Load() (Config, error) {
 		Env:             defaultEnv,
 		LogLevel:        defaultLogLevel,
 		ShutdownTimeout: defaultShutdownTimeout,
+		SchemaPath:      defaultSchemaPath,
 	}
 
 	if raw := os.Getenv("PORT"); raw != "" {
@@ -53,6 +56,10 @@ func Load() (Config, error) {
 			return Config{}, fmt.Errorf("invalid SHUTDOWN_TIMEOUT: %q", raw)
 		}
 		cfg.ShutdownTimeout = timeout
+	}
+
+	if raw := os.Getenv("SCHEMA_PATH"); raw != "" {
+		cfg.SchemaPath = raw
 	}
 
 	return cfg, nil

@@ -11,6 +11,7 @@ import (
 
 	"github.com/francisbulus/agent-ops/services/ingest/internal/config"
 	"github.com/francisbulus/agent-ops/services/ingest/internal/httpserver"
+	"github.com/francisbulus/agent-ops/services/ingest/internal/validation"
 )
 
 type server interface {
@@ -24,13 +25,22 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, signals <-
 		logger = slog.Default()
 	}
 
+	validator, err := validation.NewEventValidator(cfg.SchemaPath)
+	if err != nil {
+		return fmt.Errorf("initialize event validator: %w", err)
+	}
+
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.Port),
-		Handler:           httpserver.NewHandler(logger),
+		Handler:           httpserver.NewHandler(logger, validator),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	logger = logger.With(slog.String("addr", srv.Addr), slog.String("env", cfg.Env))
+	logger = logger.With(
+		slog.String("addr", srv.Addr),
+		slog.String("env", cfg.Env),
+		slog.String("schema_path", cfg.SchemaPath),
+	)
 	return runServer(ctx, logger, cfg.ShutdownTimeout, signals, srv)
 }
 

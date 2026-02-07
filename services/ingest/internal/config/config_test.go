@@ -10,6 +10,7 @@ func TestLoadDefaults(t *testing.T) {
 	t.Setenv("APP_ENV", "")
 	t.Setenv("LOG_LEVEL", "")
 	t.Setenv("SHUTDOWN_TIMEOUT", "")
+	t.Setenv("SCHEMA_PATH", "")
 
 	cfg, err := Load()
 	if err != nil {
@@ -27,6 +28,21 @@ func TestLoadDefaults(t *testing.T) {
 	}
 	if cfg.ShutdownTimeout != 10*time.Second {
 		t.Fatalf("cfg.ShutdownTimeout = %v, want 10s", cfg.ShutdownTimeout)
+	}
+	if cfg.SchemaPath != "packages/schemas/agent-event-v0.schema.json" {
+		t.Fatalf("cfg.SchemaPath = %q, want default schema path", cfg.SchemaPath)
+	}
+}
+
+func TestLoadAppliesSchemaPathOverride(t *testing.T) {
+	t.Setenv("SCHEMA_PATH", "/tmp/schema.json")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if cfg.SchemaPath != "/tmp/schema.json" {
+		t.Fatalf("cfg.SchemaPath = %q, want /tmp/schema.json", cfg.SchemaPath)
 	}
 }
 

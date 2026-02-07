@@ -229,6 +229,7 @@ Config vars:
 - `APP_ENV` (default `dev`)
 - `LOG_LEVEL` (default `info`, one of `debug|info|warn|error`)
 - `SHUTDOWN_TIMEOUT` (default `10s`)
+- `SCHEMA_PATH` (default resolves to `packages/schemas/agent-event-v0.schema.json`)
 
 Run tests:
 

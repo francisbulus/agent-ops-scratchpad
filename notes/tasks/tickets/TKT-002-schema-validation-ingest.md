@@ -3,8 +3,8 @@
 ## Metadata
 
 - ID: `TKT-002`
-- Status: `backlog`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `francis`
 - Estimate: `M`
 - Area: `ingest`
 
@@ -47,3 +47,13 @@
 ## Notes
 
 - Keep validator engine swappable if we move to generated code later.
+- Implemented `POST /v1/events` in `services/ingest/internal/httpserver/server.go`.
+- Added schema validator in `services/ingest/internal/validation/validator.go` loading from `packages/schemas/agent-event-v0.schema.json`.
+- Added structured 400 responses:
+  - `error: invalid_json`
+  - `error: validation_failed` with per-field `path` and `message`.
+- Added tests:
+  - `services/ingest/internal/httpserver/server_test.go`
+  - `services/ingest/internal/validation/validator_test.go`
+- Verification:
+  - `cd services/ingest && GOCACHE=/tmp/go-build go test ./...`
