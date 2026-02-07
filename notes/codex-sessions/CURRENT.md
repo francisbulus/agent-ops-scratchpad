@@ -1,14 +1,14 @@
 # Codex Session Handoff - Current
 
-- Active session file: `notes/codex-sessions/009-2026-02-07-2129.md`
+- Active session file: `notes/codex-sessions/010-2026-02-07-2133.md`
 - State: `closed`
-- Last updated (UTC): `2026-02-07 21:31:00Z`
-- Session title: `Replace custom autoreload with air`
-- Summary for next session: `Replaced custom autoreload script with air config and docs.`
+- Last updated (UTC): `2026-02-07 21:35:09Z`
+- Session title: `Create WIP architecture doc`
+- Summary for next session: `Created docs/architecture-wip.md with outcomes, primitives, component architecture, data zones, integrations, and ticket mapping.`
 
 ## Immediate Next Steps
 
-- Commit/push the air migration changes, then continue with TKT-003.
+- Expand architecture doc with concrete DB schema and API contracts while implementing TKT-003/TKT-004.
 
 ## Start Checklist
 
