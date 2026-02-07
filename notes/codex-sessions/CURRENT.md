@@ -1,14 +1,14 @@
 # Codex Session Handoff - Current
 
-- Active session file: `notes/codex-sessions/002-2026-02-07-2001.md`
+- Active session file: `notes/codex-sessions/003-2026-02-07-2009.md`
 - State: `closed`
-- Last updated (UTC): `2026-02-07 20:01:54Z`
-- Session title: `Brainstorm simple working MVP`
-- Summary for next session: `Added brainstorm session 002 defining a simple working AgentOps MVP and 7-day delivery scope.`
+- Last updated (UTC): `2026-02-07 20:09:39Z`
+- Session title: `Define first-principles platform primitives`
+- Summary for next session: `Extended session 002 with a first-principles primitives model covering tenant/run/step/model-call/token-meter/price-book/cost-ledger/budget/policy/alert/trace.`
 
 ## Immediate Next Steps
 
-- Review session 002 and decide whether to implement as one Go service or split ingest/api immediately.
+- Review primitive list and convert into a concrete v0 event schema file in packages.
 
 ## Start Checklist
 
