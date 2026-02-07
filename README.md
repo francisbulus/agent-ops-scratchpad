@@ -195,3 +195,10 @@ Working ideas for an agent observability + governance dashboard to track cost, u
 - Define SLOs: success rate, latency, and budget variance.
 - Ship MVP dashboard + two high-signal alerts.
 - Run weekly cost/failure review with owners.
+
+## Codex Session Continuity
+
+- Handoff files live in `notes/codex-sessions`.
+- Start a new handoff: `scripts/codex-session start --title "..."`
+- Close with explicit next-step context: `scripts/codex-session close --summary "..." --next "..."`
+- New Codex sessions should read `notes/codex-sessions/CURRENT.md` first.

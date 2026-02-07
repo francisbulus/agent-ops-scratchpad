@@ -1,0 +1,322 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+HANDOFF_DIR="$ROOT_DIR/notes/codex-sessions"
+CURRENT_FILE="$HANDOFF_DIR/CURRENT.md"
+INDEX_FILE="$HANDOFF_DIR/INDEX.md"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/codex-session start [--owner NAME] [--title TEXT]
+  scripts/codex-session close --summary TEXT [--next TEXT] [--blockers TEXT]
+  scripts/codex-session status
+
+Examples:
+  scripts/codex-session start --title "MVP ingest API scaffold"
+  scripts/codex-session close --summary "Ingest endpoint + schema wired" --next "Implement dashboard query API"
+EOF
+}
+
+ensure_layout() {
+  mkdir -p "$HANDOFF_DIR"
+
+  if [[ ! -f "$INDEX_FILE" ]]; then
+    cat >"$INDEX_FILE" <<'EOF'
+# Codex Session Index
+
+| Session | Started (UTC) | Owner | Title | File |
+|---|---|---|---|---|
+EOF
+  fi
+
+  if [[ ! -f "$CURRENT_FILE" ]]; then
+    cat >"$CURRENT_FILE" <<'EOF'
+# Codex Session Handoff - Current
+
+- Active session file: `none`
+- State: `idle`
+- Last updated (UTC): `not set`
+- Session title: `not set`
+- Summary for next session: `No handoff created yet.`
+
+## Immediate Next Steps
+
+- Run `scripts/codex-session start --title "..."`.
+
+## Start Checklist
+
+1. Read this file first.
+2. Open the active session file above.
+3. Continue from `## Next Session Must Start With`.
+4. When wrapping up, run `scripts/codex-session close ...`.
+EOF
+  fi
+}
+
+get_active_session_rel() {
+  if [[ ! -f "$CURRENT_FILE" ]]; then
+    return 0
+  fi
+
+  sed -n 's/^- Active session file: `\(.*\)`/\1/p' "$CURRENT_FILE" | head -n 1
+}
+
+get_current_title() {
+  if [[ ! -f "$CURRENT_FILE" ]]; then
+    return 0
+  fi
+
+  sed -n 's/^- Session title: `\(.*\)`/\1/p' "$CURRENT_FILE" | head -n 1
+}
+
+next_session_id() {
+  local max_id=0
+  local f base id
+
+  shopt -s nullglob
+  for f in "$HANDOFF_DIR"/[0-9][0-9][0-9]-*.md; do
+    base="$(basename "$f")"
+    id="${base%%-*}"
+    if [[ "$id" =~ ^[0-9]{3}$ ]] && ((10#$id > max_id)); then
+      max_id=$((10#$id))
+    fi
+  done
+  shopt -u nullglob
+
+  printf "%03d\n" "$((max_id + 1))"
+}
+
+write_current_file() {
+  local active_rel="$1"
+  local state="$2"
+  local title="$3"
+  local summary="$4"
+  local next_text="$5"
+  local now_utc
+  now_utc="$(date -u +"%Y-%m-%d %H:%M:%SZ")"
+
+  cat >"$CURRENT_FILE" <<EOF
+# Codex Session Handoff - Current
+
+- Active session file: \`$active_rel\`
+- State: \`$state\`
+- Last updated (UTC): \`$now_utc\`
+- Session title: \`$title\`
+- Summary for next session: \`$summary\`
+
+## Immediate Next Steps
+
+- $next_text
+
+## Start Checklist
+
+1. Read this file first.
+2. Open the active session file above.
+3. Continue from \`## Next Session Must Start With\`.
+4. When wrapping up, run \`scripts/codex-session close ...\`.
+EOF
+}
+
+append_index() {
+  local session_id="$1"
+  local started_utc="$2"
+  local owner="$3"
+  local title="$4"
+  local rel_file="$5"
+
+  printf '| `%s` | `%s` | `%s` | %s | `%s` |\n' \
+    "$session_id" "$started_utc" "$owner" "$title" "$rel_file" >>"$INDEX_FILE"
+}
+
+cmd_start() {
+  ensure_layout
+
+  local owner="${USER:-unknown}"
+  local title="Codex work session"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --owner)
+        owner="$2"
+        shift 2
+        ;;
+      --title)
+        title="$2"
+        shift 2
+        ;;
+      *)
+        echo "Unknown argument: $1" >&2
+        usage
+        exit 1
+        ;;
+    esac
+  done
+
+  local session_id started_utc date_tag rel_file abs_file
+  session_id="$(next_session_id)"
+  started_utc="$(date -u +"%Y-%m-%d %H:%M:%SZ")"
+  date_tag="$(date -u +"%Y-%m-%d-%H%M")"
+  rel_file="notes/codex-sessions/${session_id}-${date_tag}.md"
+  abs_file="$ROOT_DIR/$rel_file"
+
+  local branch head_commit previous_rel repo_status repo_status_md
+  branch="$(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+  head_commit="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo "none")"
+  previous_rel="$(get_active_session_rel)"
+  repo_status="$(git -C "$ROOT_DIR" status --short 2>/dev/null || true)"
+  if [[ -z "$repo_status" ]]; then
+    repo_status_md='- `clean`'
+  else
+    repo_status_md="$(printf '%s\n' "$repo_status" | sed 's/^/- `/' | sed 's/$/`/')"
+  fi
+
+  cat >"$abs_file" <<EOF
+# Codex Session $session_id - $started_utc
+
+## Metadata
+
+- Owner: \`$owner\`
+- Title: $title
+- Branch: \`$branch\`
+- HEAD commit at start: \`$head_commit\`
+- Previous session file: \`${previous_rel:-none}\`
+
+## Starting Repo Snapshot
+
+$repo_status_md
+
+## Goal
+
+- Fill in the target outcome for this session.
+
+## Work Log
+
+- Capture key edits/commands and why they were done.
+
+## Decisions
+
+- Record decisions that future sessions should not revisit blindly.
+
+## Open Risks / Blockers
+
+- Track unresolved issues or dependency risks.
+
+## Next Session Must Start With
+
+- List the first 1-3 actions the next Codex session must take.
+
+## Handoff Summary
+
+- Write a concise end-of-session summary before closing this session.
+EOF
+
+  append_index "$session_id" "$started_utc" "$owner" "$title" "$rel_file"
+  write_current_file "$rel_file" "open" "$title" "Session started; handoff not closed yet." "Open \`$rel_file\` and update Goal/Work Log as changes are made."
+
+  echo "Started session $session_id"
+  echo "Session file: $rel_file"
+}
+
+cmd_close() {
+  ensure_layout
+
+  local summary="" next_text="Review Next Session Must Start With in the active session file." blockers="none"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --summary)
+        summary="$2"
+        shift 2
+        ;;
+      --next)
+        next_text="$2"
+        shift 2
+        ;;
+      --blockers)
+        blockers="$2"
+        shift 2
+        ;;
+      *)
+        echo "Unknown argument: $1" >&2
+        usage
+        exit 1
+        ;;
+    esac
+  done
+
+  if [[ -z "$summary" ]]; then
+    echo "--summary is required for close" >&2
+    exit 1
+  fi
+
+  local active_rel active_abs now_utc branch head_commit current_title
+  active_rel="$(get_active_session_rel)"
+  if [[ -z "$active_rel" || "$active_rel" == "none" ]]; then
+    echo "No active session file in $CURRENT_FILE" >&2
+    exit 1
+  fi
+
+  active_abs="$ROOT_DIR/$active_rel"
+  if [[ ! -f "$active_abs" ]]; then
+    echo "Active session file does not exist: $active_rel" >&2
+    exit 1
+  fi
+
+  now_utc="$(date -u +"%Y-%m-%d %H:%M:%SZ")"
+  branch="$(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
+  head_commit="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo "none")"
+  current_title="$(get_current_title)"
+  if [[ -z "$current_title" || "$current_title" == "not set" ]]; then
+    current_title="Closed session handoff"
+  fi
+
+  cat >>"$active_abs" <<EOF
+
+## Closeout - $now_utc
+
+- Summary: $summary
+- Next step for future session: $next_text
+- Blockers: $blockers
+- Branch: \`$branch\`
+- HEAD at close: \`$head_commit\`
+EOF
+
+  write_current_file "$active_rel" "closed" "$current_title" "$summary" "$next_text"
+
+  echo "Closed session: $active_rel"
+}
+
+cmd_status() {
+  ensure_layout
+  cat "$CURRENT_FILE"
+}
+
+main() {
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+  fi
+
+  local cmd="$1"
+  shift
+
+  case "$cmd" in
+    start)
+      cmd_start "$@"
+      ;;
+    close)
+      cmd_close "$@"
+      ;;
+    status)
+      cmd_status "$@"
+      ;;
+    *)
+      echo "Unknown command: $cmd" >&2
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
