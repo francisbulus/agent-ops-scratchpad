@@ -11,6 +11,7 @@ import (
 
 	"github.com/francisbulus/agent-ops/services/ingest/internal/config"
 	"github.com/francisbulus/agent-ops/services/ingest/internal/httpserver"
+	"github.com/francisbulus/agent-ops/services/ingest/internal/persistence/postgres"
 	"github.com/francisbulus/agent-ops/services/ingest/internal/validation"
 )
 
@@ -29,10 +30,19 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, signals <-
 	if err != nil {
 		return fmt.Errorf("initialize event validator: %w", err)
 	}
+	store, err := postgres.NewStore(cfg.DatabaseURL)
+	if err != nil {
+		return fmt.Errorf("initialize event store: %w", err)
+	}
+	defer func() {
+		if closeErr := store.Close(); closeErr != nil {
+			logger.Error("event_store_close_failed", slog.String("error", closeErr.Error()))
+		}
+	}()
 
 	srv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.Port),
-		Handler:           httpserver.NewHandler(logger, validator),
+		Handler:           httpserver.NewHandler(logger, validator, store),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -40,6 +50,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, signals <-
 		slog.String("addr", srv.Addr),
 		slog.String("env", cfg.Env),
 		slog.String("schema_path", cfg.SchemaPath),
+		slog.Bool("db_enabled", cfg.DatabaseURL != ""),
 	)
 	return runServer(ctx, logger, cfg.ShutdownTimeout, signals, srv)
 }

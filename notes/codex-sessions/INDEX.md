@@ -12,3 +12,4 @@
 | `008` | `2026-02-07 21:26:14Z` | `francis` | Add autoreload dev server for ingest | `notes/codex-sessions/008-2026-02-07-2126.md` |
 | `009` | `2026-02-07 21:29:51Z` | `francis` | Replace custom autoreload with air | `notes/codex-sessions/009-2026-02-07-2129.md` |
 | `010` | `2026-02-07 21:33:58Z` | `francis` | Create WIP architecture doc | `notes/codex-sessions/010-2026-02-07-2133.md` |
+| `011` | `2026-02-07 21:39:24Z` | `francis` | Implement TKT-003 Postgres event persistence | `notes/codex-sessions/011-2026-02-07-2139.md` |

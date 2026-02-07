@@ -1,14 +1,14 @@
 # Codex Session Handoff - Current
 
-- Active session file: `notes/codex-sessions/010-2026-02-07-2133.md`
+- Active session file: `notes/codex-sessions/011-2026-02-07-2139.md`
 - State: `closed`
-- Last updated (UTC): `2026-02-07 21:35:09Z`
-- Session title: `Create WIP architecture doc`
-- Summary for next session: `Created docs/architecture-wip.md with outcomes, primitives, component architecture, data zones, integrations, and ticket mapping.`
+- Last updated (UTC): `2026-02-07 21:46:07Z`
+- Session title: `Implement TKT-003 Postgres event persistence`
+- Summary for next session: `Implemented TKT-003 Postgres persistence, migration SQL, idempotent insert path, and write-failure handling in POST /v1/events.`
 
 ## Immediate Next Steps
 
-- Expand architecture doc with concrete DB schema and API contracts while implementing TKT-003/TKT-004.
+- Commit/push TKT-003 changes, then start TKT-004 metrics overview API.
 
 ## Start Checklist
 

@@ -208,6 +208,7 @@ Working ideas for an agent observability + governance dashboard to track cost, u
 - Git
 - Go `1.25+` (for `services/ingest`)
 - `air` for autoreload dev server (`go install github.com/air-verse/air@latest`)
+- PostgreSQL `14+`
 - `curl` (for health checks)
 
 ## Local Startup (Current MVP Scaffold)
@@ -237,6 +238,13 @@ Config vars:
 - `LOG_LEVEL` (default `info`, one of `debug|info|warn|error`)
 - `SHUTDOWN_TIMEOUT` (default `10s`)
 - `SCHEMA_PATH` (default resolves to `packages/schemas/agent-event-v0.schema.json`)
+- `DATABASE_URL` (required, postgres DSN for event persistence)
+
+Run migration before starting ingest:
+
+```bash
+psql "$DATABASE_URL" -f services/ingest/migrations/001_create_agent_events.sql
+```
 
 Run tests:
 

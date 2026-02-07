@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -18,8 +19,13 @@ type EventValidator interface {
 	Validate(payload any) []validation.Error
 }
 
+// EventStore persists validated events.
+type EventStore interface {
+	InsertEvent(ctx context.Context, payload map[string]any) (bool, error)
+}
+
 // NewHandler returns the ingest service HTTP handler tree.
-func NewHandler(logger *slog.Logger, validator EventValidator) http.Handler {
+func NewHandler(logger *slog.Logger, validator EventValidator, store EventStore) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -31,15 +37,19 @@ func NewHandler(logger *slog.Logger, validator EventValidator) http.Handler {
 	})
 
 	mux.HandleFunc("POST /v1/events", func(w http.ResponseWriter, r *http.Request) {
-		handlePostEvents(w, r, validator)
+		handlePostEvents(w, r, validator, store)
 	})
 
 	return requestLogger(logger, mux)
 }
 
-func handlePostEvents(w http.ResponseWriter, r *http.Request, validator EventValidator) {
+func handlePostEvents(w http.ResponseWriter, r *http.Request, validator EventValidator, store EventStore) {
 	if validator == nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "validator_not_configured"})
+		return
+	}
+	if store == nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "store_not_configured"})
 		return
 	}
 
@@ -61,7 +71,28 @@ func handlePostEvents(w http.ResponseWriter, r *http.Request, validator EventVal
 		return
 	}
 
-	writeJSON(w, http.StatusAccepted, map[string]string{"status": "accepted"})
+	payloadMap, ok := payload.(map[string]any)
+	if !ok {
+		writeJSON(w, http.StatusBadRequest, map[string]any{
+			"error":   "invalid_payload_type",
+			"message": "request body must be a JSON object",
+		})
+		return
+	}
+
+	inserted, err := store.InsertEvent(r.Context(), payloadMap)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]any{
+			"error":   "persist_failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusAccepted, map[string]any{
+		"status":    "accepted",
+		"persisted": inserted,
+	})
 }
 
 func decodeJSONBody(body io.ReadCloser) (any, error) {

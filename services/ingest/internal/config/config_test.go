@@ -11,6 +11,7 @@ func TestLoadDefaults(t *testing.T) {
 	t.Setenv("LOG_LEVEL", "")
 	t.Setenv("SHUTDOWN_TIMEOUT", "")
 	t.Setenv("SCHEMA_PATH", "")
+	t.Setenv("DATABASE_URL", "")
 
 	cfg, err := Load()
 	if err != nil {
@@ -32,6 +33,9 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.SchemaPath != "packages/schemas/agent-event-v0.schema.json" {
 		t.Fatalf("cfg.SchemaPath = %q, want default schema path", cfg.SchemaPath)
 	}
+	if cfg.DatabaseURL != "" {
+		t.Fatalf("cfg.DatabaseURL = %q, want empty", cfg.DatabaseURL)
+	}
 }
 
 func TestLoadAppliesSchemaPathOverride(t *testing.T) {
@@ -43,6 +47,18 @@ func TestLoadAppliesSchemaPathOverride(t *testing.T) {
 	}
 	if cfg.SchemaPath != "/tmp/schema.json" {
 		t.Fatalf("cfg.SchemaPath = %q, want /tmp/schema.json", cfg.SchemaPath)
+	}
+}
+
+func TestLoadAppliesDatabaseURLOverride(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/agentops?sslmode=disable")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if cfg.DatabaseURL == "" {
+		t.Fatal("cfg.DatabaseURL is empty, want configured value")
 	}
 }
 

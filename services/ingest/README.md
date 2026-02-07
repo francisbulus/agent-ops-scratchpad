@@ -1,6 +1,6 @@
 # Ingest Service
 
-Minimal ingest service scaffold for MVP tickets `TKT-001` and `TKT-002`.
+Minimal ingest service scaffold for MVP tickets `TKT-001` through `TKT-003`.
 
 ## Run
 
@@ -31,6 +31,15 @@ Environment variables:
 - `LOG_LEVEL` (default: `info`, one of `debug|info|warn|error`)
 - `SHUTDOWN_TIMEOUT` (default: `10s`)
 - `SCHEMA_PATH` (default resolves to `packages/schemas/agent-event-v0.schema.json`)
+- `DATABASE_URL` (required, postgres DSN for event persistence)
+
+## Database Migration
+
+Run before starting the service:
+
+```bash
+psql "$DATABASE_URL" -f services/ingest/migrations/001_create_agent_events.sql
+```
 
 ## Endpoints
 
@@ -55,8 +64,9 @@ curl -sS -X POST http://localhost:8080/v1/events \
 
 `POST /v1/events` returns:
 
-- `202` for valid payloads
+- `202` for valid payloads (with `persisted: true|false` for idempotency visibility)
 - `400` with structured validation errors for invalid payloads
+- `500` when persistence fails
 
 ## Tests
 

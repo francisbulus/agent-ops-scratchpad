@@ -22,6 +22,7 @@ type Config struct {
 	LogLevel        string
 	ShutdownTimeout time.Duration
 	SchemaPath      string
+	DatabaseURL     string
 }
 
 // Load reads config from environment with sensible defaults.
@@ -60,6 +61,10 @@ func Load() (Config, error) {
 
 	if raw := os.Getenv("SCHEMA_PATH"); raw != "" {
 		cfg.SchemaPath = raw
+	}
+
+	if raw := os.Getenv("DATABASE_URL"); raw != "" {
+		cfg.DatabaseURL = raw
 	}
 
 	return cfg, nil
