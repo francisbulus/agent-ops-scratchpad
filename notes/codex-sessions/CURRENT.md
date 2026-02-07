@@ -1,14 +1,14 @@
 # Codex Session Handoff - Current
 
-- Active session file: `notes/codex-sessions/004-2026-02-07-2021.md`
+- Active session file: `notes/codex-sessions/005-2026-02-07-2037.md`
 - State: `closed`
-- Last updated (UTC): `2026-02-07 20:22:15Z`
-- Session title: `Create concrete v0 event schema under packages`
-- Summary for next session: `Added concrete v0 JSON Schema in packages/schemas for event, usage, cost, budget, policy, alert, and trace primitives.`
+- Last updated (UTC): `2026-02-07 20:39:58Z`
+- Session title: `Break MVP into trackable testable tickets`
+- Summary for next session: `Added notes/tasks tracker with board, template, and 10 contained testable MVP tickets.`
 
 ## Immediate Next Steps
 
-- Integrate schema validation into POST /v1/events and test sample payloads.
+- Start TKT-001 and move it to In Progress in notes/tasks/BOARD.md.
 
 ## Start Checklist
 
