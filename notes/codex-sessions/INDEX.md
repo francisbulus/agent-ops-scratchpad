@@ -7,3 +7,4 @@
 | `003` | `2026-02-07 20:09:08Z` | `francis` | Define first-principles platform primitives | `notes/codex-sessions/003-2026-02-07-2009.md` |
 | `004` | `2026-02-07 20:21:54Z` | `francis` | Create concrete v0 event schema under packages | `notes/codex-sessions/004-2026-02-07-2021.md` |
 | `005` | `2026-02-07 20:37:40Z` | `francis` | Break MVP into trackable testable tickets | `notes/codex-sessions/005-2026-02-07-2037.md` |
+| `006` | `2026-02-07 20:51:33Z` | `francis` | Implement TKT-001 ingest scaffold with structured logging | `notes/codex-sessions/006-2026-02-07-2051.md` |

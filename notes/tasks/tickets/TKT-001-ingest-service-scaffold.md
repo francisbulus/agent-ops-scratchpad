@@ -3,8 +3,8 @@
 ## Metadata
 
 - ID: `TKT-001`
-- Status: `ready`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `francis`
 - Estimate: `S`
 - Area: `ingest`
 
@@ -46,3 +46,13 @@
 ## Notes
 
 - Keep code intentionally minimal to unblock follow-on tickets.
+- Implemented files:
+  - `services/ingest/cmd/ingest/main.go`
+  - `services/ingest/internal/app/app.go`
+  - `services/ingest/internal/config/config.go`
+  - `services/ingest/internal/httpserver/server.go`
+  - `services/ingest/internal/logging/logging.go`
+  - `services/ingest/README.md`
+  - tests under `services/ingest/internal/*/*_test.go`
+- Verification:
+  - `cd services/ingest && GOCACHE=/tmp/go-build go test ./...`

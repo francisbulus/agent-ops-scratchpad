@@ -14,7 +14,7 @@
 
 ## Ready
 
-- `TKT-001` Ingest service scaffold (`notes/tasks/tickets/TKT-001-ingest-service-scaffold.md`)
+- _none_
 
 ## In Progress
 
@@ -26,4 +26,4 @@
 
 ## Done
 
-- _none_
+- `TKT-001` Ingest service scaffold (`notes/tasks/tickets/TKT-001-ingest-service-scaffold.md`)

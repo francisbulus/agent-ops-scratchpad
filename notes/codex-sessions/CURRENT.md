@@ -1,14 +1,14 @@
 # Codex Session Handoff - Current
 
-- Active session file: `notes/codex-sessions/005-2026-02-07-2037.md`
+- Active session file: `notes/codex-sessions/006-2026-02-07-2051.md`
 - State: `closed`
-- Last updated (UTC): `2026-02-07 20:39:58Z`
-- Session title: `Break MVP into trackable testable tickets`
-- Summary for next session: `Added notes/tasks tracker with board, template, and 10 contained testable MVP tickets.`
+- Last updated (UTC): `2026-02-07 20:56:50Z`
+- Session title: `Implement TKT-001 ingest scaffold with structured logging`
+- Summary for next session: `Implemented TKT-001 ingest scaffold with structured logging, health/readiness endpoints, graceful shutdown, and passing tests.`
 
 ## Immediate Next Steps
 
-- Start TKT-001 and move it to In Progress in notes/tasks/BOARD.md.
+- Commit/push TKT-001 work and begin TKT-002 schema validation endpoint.
 
 ## Start Checklist
 
