@@ -3,8 +3,8 @@
 ## Metadata
 
 - ID: `TKT-004`
-- Status: `backlog`
-- Owner: `unassigned`
+- Status: `done`
+- Owner: `francis`
 - Estimate: `M`
 - Area: `api`
 
@@ -47,3 +47,18 @@
 ## Notes
 
 - Keep SQL simple and explainable for first release.
+- Implemented endpoint in current ingest runtime:
+  - `GET /v1/metrics/overview` in `services/ingest/internal/httpserver/server.go`
+- Added query layer:
+  - `services/ingest/internal/persistence/postgres/metrics.go`
+  - filters: `tenant_id`, `workspace_id`, `project_id`, `agent_id`, `workflow_id`
+  - window default: 24h (`window_hours` query param optional)
+- Added deterministic response contract type:
+  - `services/ingest/internal/persistence/types.go`
+- Added tests:
+  - `services/ingest/internal/httpserver/server_test.go`
+  - `services/ingest/internal/persistence/postgres/metrics_test.go`
+- Verification:
+  - `cd services/ingest && GOCACHE=/tmp/go-build go test ./...`
+- Note:
+  - Endpoint currently lives in ingest service for MVP speed; can be moved to `services/api` in a later refactor without changing response contract.

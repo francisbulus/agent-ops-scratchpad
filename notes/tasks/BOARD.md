@@ -2,7 +2,6 @@
 
 ## Backlog
 
-- `TKT-004` Metrics overview API (`notes/tasks/tickets/TKT-004-metrics-overview-api.md`)
 - `TKT-005` Recent failures API (`notes/tasks/tickets/TKT-005-recent-failures-api.md`)
 - `TKT-006` Dashboard MVP page (`notes/tasks/tickets/TKT-006-dashboard-mvp-page.md`)
 - `TKT-007` Budget threshold worker + Slack alert (`notes/tasks/tickets/TKT-007-budget-threshold-worker.md`)
@@ -27,3 +26,4 @@
 - `TKT-001` Ingest service scaffold (`notes/tasks/tickets/TKT-001-ingest-service-scaffold.md`)
 - `TKT-002` Schema validation on ingest endpoint (`notes/tasks/tickets/TKT-002-schema-validation-ingest.md`)
 - `TKT-003` Persist events in Postgres (`notes/tasks/tickets/TKT-003-postgres-event-persistence.md`)
+- `TKT-004` Metrics overview API (`notes/tasks/tickets/TKT-004-metrics-overview-api.md`)

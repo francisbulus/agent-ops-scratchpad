@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/francisbulus/agent-ops/services/ingest/internal/persistence"
 	"github.com/francisbulus/agent-ops/services/ingest/internal/validation"
 )
 
@@ -22,6 +25,7 @@ type EventValidator interface {
 // EventStore persists validated events.
 type EventStore interface {
 	InsertEvent(ctx context.Context, payload map[string]any) (bool, error)
+	GetOverviewMetrics(ctx context.Context, filter persistence.OverviewFilter) (persistence.OverviewMetrics, error)
 }
 
 // NewHandler returns the ingest service HTTP handler tree.
@@ -38,6 +42,9 @@ func NewHandler(logger *slog.Logger, validator EventValidator, store EventStore)
 
 	mux.HandleFunc("POST /v1/events", func(w http.ResponseWriter, r *http.Request) {
 		handlePostEvents(w, r, validator, store)
+	})
+	mux.HandleFunc("GET /v1/metrics/overview", func(w http.ResponseWriter, r *http.Request) {
+		handleGetMetricsOverview(w, r, store)
 	})
 
 	return requestLogger(logger, mux)
@@ -93,6 +100,61 @@ func handlePostEvents(w http.ResponseWriter, r *http.Request, validator EventVal
 		"status":    "accepted",
 		"persisted": inserted,
 	})
+}
+
+func handleGetMetricsOverview(w http.ResponseWriter, r *http.Request, store EventStore) {
+	if store == nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "store_not_configured"})
+		return
+	}
+
+	filter, err := parseOverviewFilter(r)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{
+			"error":   "invalid_query",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	overview, err := store.GetOverviewMetrics(r.Context(), filter)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{
+			"error":   "metrics_query_failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, overview)
+}
+
+func parseOverviewFilter(r *http.Request) (persistence.OverviewFilter, error) {
+	var filter persistence.OverviewFilter
+	query := r.URL.Query()
+
+	filter.TenantID = query.Get("tenant_id")
+	filter.WorkspaceID = query.Get("workspace_id")
+	filter.ProjectID = query.Get("project_id")
+	filter.AgentID = query.Get("agent_id")
+	filter.WorkflowID = query.Get("workflow_id")
+
+	windowHoursRaw := query.Get("window_hours")
+	if windowHoursRaw == "" {
+		filter.WindowHours = 24
+		return filter, nil
+	}
+
+	windowHours, err := strconv.Atoi(windowHoursRaw)
+	if err != nil {
+		return filter, fmt.Errorf("window_hours must be an integer")
+	}
+	if windowHours < 1 || windowHours > 168 {
+		return filter, fmt.Errorf("window_hours must be between 1 and 168")
+	}
+	filter.WindowHours = windowHours
+
+	return filter, nil
 }
 
 func decodeJSONBody(body io.ReadCloser) (any, error) {

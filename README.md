@@ -229,6 +229,7 @@ Health checks:
 ```bash
 curl -sS http://localhost:8080/healthz
 curl -sS http://localhost:8080/readyz
+curl -sS "http://localhost:8080/v1/metrics/overview?window_hours=24"
 ```
 
 Config vars:

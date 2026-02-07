@@ -10,7 +10,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/francisbulus/agent-ops/services/ingest/internal/persistence"
 	"github.com/francisbulus/agent-ops/services/ingest/internal/validation"
 )
 
@@ -25,6 +27,7 @@ func (s stubValidator) Validate(any) []validation.Error {
 type stubStore struct {
 	inserted bool
 	err      error
+	overview persistence.OverviewMetrics
 }
 
 func (s stubStore) InsertEvent(context.Context, map[string]any) (bool, error) {
@@ -32,6 +35,13 @@ func (s stubStore) InsertEvent(context.Context, map[string]any) (bool, error) {
 		return false, s.err
 	}
 	return s.inserted, nil
+}
+
+func (s stubStore) GetOverviewMetrics(context.Context, persistence.OverviewFilter) (persistence.OverviewMetrics, error) {
+	if s.err != nil {
+		return persistence.OverviewMetrics{}, s.err
+	}
+	return s.overview, nil
 }
 
 func TestHealthAndReadyEndpoints(t *testing.T) {
@@ -153,5 +163,76 @@ func TestPostEventsPersistFailure(t *testing.T) {
 	}
 	if body["error"] != "persist_failed" {
 		t.Fatalf("error = %v, want persist_failed", body["error"])
+	}
+}
+
+func TestGetMetricsOverviewReturnsPayload(t *testing.T) {
+	now := time.Now().UTC()
+	handler := NewHandler(slog.New(slog.NewJSONHandler(io.Discard, nil)), stubValidator{}, stubStore{
+		overview: persistence.OverviewMetrics{
+			WindowStart:    now.Add(-24 * time.Hour),
+			WindowEnd:      now,
+			WindowHours:    24,
+			TotalRuns:      10,
+			SuccessfulRuns: 8,
+			FailedRuns:     2,
+			SuccessRate:    80,
+			TotalCostUSD:   1.23,
+			AvgLatencyMS:   120,
+		},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/metrics/overview", nil)
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", rr.Code, http.StatusOK)
+	}
+
+	var body map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if body["total_runs"] != float64(10) {
+		t.Fatalf("total_runs = %v, want 10", body["total_runs"])
+	}
+	if body["success_rate"] != float64(80) {
+		t.Fatalf("success_rate = %v, want 80", body["success_rate"])
+	}
+}
+
+func TestGetMetricsOverviewInvalidWindowQuery(t *testing.T) {
+	handler := NewHandler(slog.New(slog.NewJSONHandler(io.Discard, nil)), stubValidator{}, stubStore{})
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/metrics/overview?window_hours=bad", nil)
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", rr.Code, http.StatusBadRequest)
+	}
+}
+
+func TestGetMetricsOverviewStoreFailure(t *testing.T) {
+	handler := NewHandler(slog.New(slog.NewJSONHandler(io.Discard, nil)), stubValidator{}, stubStore{err: errors.New("db unavailable")})
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/metrics/overview", nil)
+	rr := httptest.NewRecorder()
+
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("status = %d, want %d", rr.Code, http.StatusInternalServerError)
+	}
+
+	var body map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if body["error"] != "metrics_query_failed" {
+		t.Fatalf("error = %v, want metrics_query_failed", body["error"])
 	}
 }

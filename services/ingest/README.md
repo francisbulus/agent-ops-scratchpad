@@ -46,6 +46,7 @@ psql "$DATABASE_URL" -f services/ingest/migrations/001_create_agent_events.sql
 ```bash
 curl -sS http://localhost:8080/healthz
 curl -sS http://localhost:8080/readyz
+curl -sS "http://localhost:8080/v1/metrics/overview?window_hours=24"
 ```
 
 ```bash
@@ -67,6 +68,12 @@ curl -sS -X POST http://localhost:8080/v1/events \
 - `202` for valid payloads (with `persisted: true|false` for idempotency visibility)
 - `400` with structured validation errors for invalid payloads
 - `500` when persistence fails
+
+`GET /v1/metrics/overview` returns:
+
+- `200` with aggregate metrics (`total_runs`, `success_rate`, `total_cost_usd`, `avg_latency_ms`)
+- defaults to last 24h when `window_hours` is omitted
+- supports optional filters: `tenant_id`, `workspace_id`, `project_id`, `agent_id`, `workflow_id`
 
 ## Tests
 

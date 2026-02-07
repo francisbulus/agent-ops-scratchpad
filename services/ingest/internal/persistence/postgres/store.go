@@ -48,9 +48,16 @@ type dbAPI interface {
 	Close() error
 }
 
+type rowScanner interface {
+	Scan(dest ...any) error
+}
+
+type queryRowFunc func(ctx context.Context, query string, args ...any) rowScanner
+
 // Store persists validated events in Postgres.
 type Store struct {
-	db dbAPI
+	db       dbAPI
+	queryRow queryRowFunc
 }
 
 // NewStore constructs a postgres-backed event store and verifies connectivity.
@@ -72,7 +79,12 @@ func NewStore(databaseURL string) (*Store, error) {
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
 
-	return &Store{db: db}, nil
+	return &Store{
+		db: db,
+		queryRow: func(ctx context.Context, query string, args ...any) rowScanner {
+			return db.QueryRowContext(ctx, query, args...)
+		},
+	}, nil
 }
 
 // InsertEvent writes one validated event. It returns inserted=false for idempotent duplicates.

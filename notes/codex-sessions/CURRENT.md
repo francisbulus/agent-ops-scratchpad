@@ -1,14 +1,14 @@
 # Codex Session Handoff - Current
 
-- Active session file: `notes/codex-sessions/011-2026-02-07-2139.md`
+- Active session file: `notes/codex-sessions/012-2026-02-07-2155.md`
 - State: `closed`
-- Last updated (UTC): `2026-02-07 21:46:07Z`
-- Session title: `Implement TKT-003 Postgres event persistence`
-- Summary for next session: `Implemented TKT-003 Postgres persistence, migration SQL, idempotent insert path, and write-failure handling in POST /v1/events.`
+- Last updated (UTC): `2026-02-07 22:00:40Z`
+- Session title: `Start TKT-004 metrics overview API`
+- Summary for next session: `Implemented TKT-004 metrics overview API with default 24h window, optional scope filters, SQL query layer, tests, and docs updates.`
 
 ## Immediate Next Steps
 
-- Commit/push TKT-003 changes, then start TKT-004 metrics overview API.
+- Commit/push TKT-004 changes, then start TKT-005 recent failures API.
 
 ## Start Checklist
 
